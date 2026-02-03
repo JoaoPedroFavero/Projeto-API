@@ -1,14 +1,11 @@
 // arquivo de entrada principal e aplicação
 
-require(`dotenv`).config();
+require('dotenv').config();
 
-const express = require(`express`);
-const app = express();
+const app = require('./app');
 
-const PORT = process.env.PORTA || 3000;
+const PORT = process.env.PORT || 3005;
 
 app.listen(PORT, () => {
     console.log(`Server rodando na porta ${PORT}`);
 });
-
-
