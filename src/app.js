@@ -2,8 +2,15 @@
 
 const express = require('express');
 const app = express();
+const {testConnection} = require(`./config/db`);
 
 app.use(express.json());
+
+async function verificarDB() {
+    const resultado = await testConnection();
+    console.log(resultado.message);
+}
+verificarDB();
 
 app.get(`/`, (req, res) => //rota principal: (https://localhost/3001:{rota})
     res.send(

@@ -1,0 +1,23 @@
+CREATE DATABASE Fiscal;
+USE Fiscal;
+
+CREATE TABLE clientes(
+	cpf CHAR(11) PRIMARY KEY NOT NULL UNIQUE,
+    nome VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE restaurantes(
+	cnpj CHAR(14) PRIMARY KEY NOT NULL UNIQUE,
+    nomeFantasia VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE cuponsFiscais(
+	idCupom CHAR(5) NOT NULL UNIQUE,
+    valorTotal DECIMAL(6,2) NOT NULL,
+    dataCompra DATE NOT NULL,
+    clientesCpf CHAR(11) NOT NULL,
+    restaurantesCNPJ CHAR(14) NOT NULL,
+    PRIMARY KEY(clientesCpf, restaurantesCNPJ, idCupom),
+    FOREIGN KEY (clientesCpf) REFERENCES clientes(cpf) ON DELETE CASCADE,
+    FOREIGN KEY (restaurantesCNPJ) REFERENCES restaurantes(cnpj) ON DELETE CASCADE
+);
