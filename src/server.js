@@ -1,31 +1,15 @@
-// aqui ficam as configurações da aplicação, como rotas e middlewares
-
-const express = require('express');
+const express = require(`express`);
+const {pool} = require(`./config/db`);
 const app = express();
-const {testConnection} = require(`./config/db`);
-const serverRoutes = require(`./server`);
 
-app.use(express.json());
-
-app.get(`/`, (req, res) => //rota principal: (https://localhost/3001:{rota})
-    res.send(
-        {status: `ok`, message: `Funcionando`}
-    )  
-);
-
-app.use(`/`, serverRoutes);
-
-async function verificarDB() {
-    const resultado = await testConnection();
-    console.log(resultado.message);
-}
-
-verificarDB();
-
-app.use((err, req, res, next) => {
-    console.error(err);
-    res.status(err.status || 500).json({error: err.message || `Erro Interno`});
-});
+app.get(`/cuponsFiscais`, async (req, res) => 
+    {
+    const [rows] = await pool.execute(`SELECT * FROM cuponsFiscais`);
+    if(rows == 0){
+        return res.status(404).json({error: `Não há cupons cadastrados!`});
+    }
+    }
+)
 
 module.exports = app;
 
