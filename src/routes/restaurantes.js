@@ -1,6 +1,5 @@
 const express = require(`express`);
 const {pool} = require(`../config/db`);
-//const {validateCnpj} = require('cpf-cnpj-validator');
 const { validator } = require('cpf-cnpj-validator');
 const Joi = require('@hapi/joi').extend(validator);
 const validateCnpj = Joi.document().cnpj();
@@ -88,7 +87,7 @@ router.post(`/`, async (req, res) => {
     }
 
     //Validacao do CNPJ
-    if(!cnpj || !validateCnpj.validate(cnpj)){
+    if(!cnpj || validateCnpj.validate(cnpj)){
         return res.status(400).json({
             error: `CNPJ inválido!`,
             message: `Favor inserir o CNPJ corretamente (14 digitos numéricos, apenas!)`
