@@ -1,6 +1,10 @@
 const express = require(`express`);
 const {pool} = require(`../config/db`);
-const validateCpf = require('validar-cpf');
+
+const { validator } = require('cpf-cnpj-validator');
+const Joi = require('@hapi/joi').extend(validator);
+const validateCpf = Joi.document().cpf();
+
 const router = express.Router();
 
 //==== GET ====
@@ -44,7 +48,7 @@ router.delete(`/excluir-clientes-cpf/:cpf/permanente`, async (req, res) => {
             return res.status(404).json({error: `Cliente não foi encontrado!`});
         }
         await pool.execute(`DELETE FROM clientes WHERE cpf = ?`, [cpf]);
-        res.json({message: `Cliente excluido com sucesso!`, id: cpf});
+        res.json({message: `Cliente excluido com sucesso!`, cpf: cpf});
     }catch(error){
         res.status();
     }
@@ -85,7 +89,7 @@ router.post(`/`, async (req, res) => {
     }
 
     //Validacao do CPF
-    if(!cpf || !validateCpf(cpf)){
+    if(!cpf || !validateCpf.validate(cpf)){
         return res.status(400).json({
             error: `CPF inválido!`,
             message: `Favor inserir o CPF corretamente (11 digitos numéricos, apenas!)`

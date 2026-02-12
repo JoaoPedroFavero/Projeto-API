@@ -87,7 +87,7 @@ router.post(`/`, async (req, res) => {
     }
 
     //Validacao do CNPJ
-    if(!cnpj || validateCnpj.validate(cnpj)){
+    if(!cnpj || !validateCnpj.validate(cnpj)){
         return res.status(400).json({
             error: `CNPJ inválido!`,
             message: `Favor inserir o CNPJ corretamente (14 digitos numéricos, apenas!)`
