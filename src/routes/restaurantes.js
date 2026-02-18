@@ -107,10 +107,8 @@ router.post(`/`, async (req, res) => {
 });
 
 // ==== PUT (Atualização) ====
-
-
 // Atualizar restaurante existente
-router.put(`/:cnpjAtual`, async (req, res) => {
+router.put(`/atualizar-restaurante/:cnpjAtual`, async (req, res) => {
     const cnpjUrl = req.params.cnpjAtual;
     const { cnpj, nomeFantasia } = req.body;
 

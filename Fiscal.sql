@@ -12,7 +12,7 @@ CREATE TABLE restaurantes(
 );
 
 CREATE TABLE cuponsFiscais(
-	idCupom CHAR(5) NOT NULL UNIQUE,
+	idCupom INT AUTO_INCREMENT NOT NULL UNIQUE,
     valorTotal DECIMAL(6,2) NOT NULL,
     dataCompra DATE NOT NULL,
     clientesCpf CHAR(11) NOT NULL,
@@ -45,18 +45,18 @@ INSERT INTO restaurantes (cnpj, nomeFantasia) VALUES
 -- Inserindo cupons fiscais
 -- os CPFs e CNPJs já existem nas tabelas anteriores (requisito das FKs).
 INSERT INTO cuponsFiscais
-(idCupom, valorTotal, dataCompra, clientesNome, clientesCpf, restaurantesNome, restaurantesCNPJ) VALUES
-('C001', 45.90, '2025-01-10', 'Ana Silva', '12345678901','Restaurante Sabor Caseiro', '11111111000101'),
-('C002', 78.50, '2025-01-11', 'Bruno Costa', '23456789012', 'Pizzaria Bom Gosto', '22222222000102'),
-('C003', 120.00, '2025-01-12','Carla Mendes', '34567890123', 'Churrascaria Fogo Alto', '33333333000103'),
-('C004', 32.75, '2025-01-12', 'Ana Silva', '12345678901', 'Lanchonete Fast Bite', '44444444000104'),
-('C005', 89.90, '2025-01-13', 'Daniel Rocha', '45678901234', 'Pizzaria Bom Gosto', '22222222000102'),
-('C006', 150.30, '2025-01-14', 'Eduarda Lima', '56789012345', 'Churrascaria Fogo Alto', '33333333000103');
+(valorTotal, dataCompra, clientesNome, clientesCpf, restaurantesNome, restaurantesCNPJ) VALUES
+(45.90, '2025-01-10', 'Ana Silva', '12345678901','Restaurante Sabor Caseiro', '11111111000101'),
+(78.50, '2025-01-11', 'Bruno Costa', '23456789012', 'Pizzaria Bom Gosto', '22222222000102'),
+(120.00, '2025-01-12','Carla Mendes', '34567890123', 'Churrascaria Fogo Alto', '33333333000103'),
+(32.75, '2025-01-12', 'Ana Silva', '12345678901', 'Lanchonete Fast Bite', '44444444000104'),
+(89.90, '2025-01-13', 'Daniel Rocha', '45678901234', 'Pizzaria Bom Gosto', '22222222000102'),
+(150.30, '2025-01-14', 'Eduarda Lima', '56789012345', 'Churrascaria Fogo Alto', '33333333000103');
 
+DROP TABLE cuponsFiscais;
 
 SELECT * FROM clientes;
 SELECT * FROM cuponsFiscais;
 SELECT * FROM cuponsFiscais WHERE clientesCpf = 12345678901;
 
 DROP TABLE cuponsFiscais;
-

@@ -18,7 +18,7 @@ const clienteSchema = Joi.object({
     // Forçamos o uso do validador de CPF da extensão
     cpf: Joi.document().cpf().required().messages({
         'document.cpf': 'O CPF informado é inválido.'
-        // Valida que o CPF é obrigatório e segue a regra matemática correta, não aceitano qualquer numero aleatorio.
+        // Valida que o CPF é obrigatório e segue a regra matemática correta, não aceitando qualquer numero aleatorio.
     })
 });
 const router = express.Router();
@@ -96,6 +96,7 @@ router.post(`/`, async (req, res) => {
     // Garante que o CPF é uma string de apenas números
     let cpfLimpo = String(req.body.cpf || '').replace(/\D/g, '');
     req.body.cpf = cpfLimpo;
+    const nomeCliente = req.body.nome;
 
     // Valida os dados com o schema
     const { error, value } = clienteSchema.validate(req.body);
@@ -103,11 +104,18 @@ router.post(`/`, async (req, res) => {
     if (error) {
         // Log para você ver no terminal o que o Joi está reclamando exatamente
         console.log("Erro de validação:", error.details); 
-
+        if(nomeCliente.length > 50){
+            return res.status(400).json({
+            error: `Dados inválidos!`,
+            message: `O nome do cliente deve ter no máximo 50 caracteres!`
+            });
+            
+        } else {
         return res.status(400).json({
             error: `Dados inválidos!`,
             message: error.details[0].message // Pegar a mensagem específica do erro
-        });
+            });
+        }
     }
 
     const { cpf, nome } = value;
@@ -119,6 +127,13 @@ router.post(`/`, async (req, res) => {
             return res.status(409).json({
                 error: `CPF já existe!`,
                 message: `Já existe um cliente com esse cpf: ${cpf}`
+            });
+        }
+
+        if(nome.trim() === "" || nome.length > 50){
+            return res.status(400).json({
+                error: `Nome inválido!`,
+                message: `Forneça um nome válido (não vazio e até 50 caracteres)!`
             });
         }
 
@@ -138,6 +153,57 @@ router.post(`/`, async (req, res) => {
         res.status(500).json({ error: `Erro ao criar cliente`, details: error.message });
     }
 });
+
+// === PUTs ====
+
+// Atualizar cliente existente
+router.put(`/atualizar-cliente/:cpfAtual`, async (req, res) => {
+    const cpfCliente = req.params.cpfAtual;
+    const { cpf, nome } = req.body;
+
+    try {
+        // Verifica se cliente existe
+        const [cpfExiste] = await pool.execute('SELECT * FROM clientes WHERE cpf = ?', [cpfCliente]);
+        if (cpfExiste.length === 0) return res.status(404).json({ error: "Cliente não encontrado!" });
+
+        const campos = [];
+        const valores = [];
+
+        // Validação e limpeza do novo CPF (se enviado)
+        if (cpf !== undefined) {
+            const cpfLimpo = String(cpf).replace(/\D/g, '');
+            const { error } = Joi.document().cpf().validate(cpfLimpo);
+            if (error) return res.status(400).json({ error: "Novo CPF informado é inválido!" });
+            
+            campos.push('cpf = ?');
+            valores.push(cpfLimpo);
+        }
+
+        // Validação do nomeFantasia (se enviado)
+        if (nome !== undefined) {
+            if (nome.trim() === "" || nome.length > 50) {
+                return res.status(400).json({ error: "Nome inválido!" });
+            }
+            campos.push('nome = ?');
+            valores.push(nome.trim());
+        }
+
+        if (campos.length === 0) {
+            return res.status(400).json({ error: "Nenhum campo para atualizar informado." });
+        }
+
+        valores.push(cpfCliente); // Para o WHERE
+        const sql = `UPDATE clientes SET ${campos.join(', ')} WHERE cpf = ?`;
+        
+        await pool.execute(sql, valores);
+        res.json({ message: "Cliente atualizado com sucesso!" });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: `Erro ao atualizar.`, details: error.message });
+    }
+});
+
 
 module.exports = router;
 // Exporta o roteador para ser usado no app principal.

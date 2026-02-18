@@ -114,20 +114,41 @@ Aqui é iniciado o servidor e onde são criadas as rotas.
 
     ```bash
     # exemplo no Postman
-    { 
+    {
+        "valor": 100,
+        "data": "2026-02-13",
+        "cpfCliente": "20017394007",
+        "nomeCliente": "Aragorn",
+        "cnpjRestaurante": "42743863000107",
+        "nomeFantasia": "Siri Cascudo Lanches e Hamburgueria"
     }
+    
     ```
 
     ```bash
     # exemplo de Saida Positiva
+    
     {
-    }
+        "message": "Cupom Fiscal cadastrado com Sucesso!",
+        "cupom": {
+            "valor": 100,
+            "data": "2026-02-13T00:00:00.000Z",
+            "nomeCliente": "Aragorn",
+            "cpfCliente": "20017394007",
+            "nomeFantasia": "Siri Cascudo Lanches e Hamburgueria",
+            "cnpjRestaurante": "42743863000107"
+        }
+    }   
+
     ```
 
     ```bash
     # exemplo de Saida Negativa
+    # nesse caso se o CPF/CNPJ estiver incorreto
     {
-    }      
+        "error": "Dados inválidos!",
+        "message": "CNPJ/CPF inválido ou Nome Fantasia fora do padrão."
+    }     
     ```
 
 ### PUT
@@ -135,19 +156,60 @@ Aqui é iniciado o servidor e onde são criadas as rotas.
 - **PUT** `/clientes` - Atualiza um cliente, ou parcialmente ou totalmente
 - ```javascript
     //Objeto requerido pelo body na rota POST
-    const {cpf, nome} = req.body
+    const {cpf, nome} = req.body;
     ```
 
     ```bash
     # exemplo no Postman
+    {
+        "cpf": "20017394007",
+        "nome": "Aragorn Passolargo "
+    }
     ```
 
     ```bash
     # exemplo de Saida Positiva
+    {
+        "message": "Cliente atualizado com sucesso!"
+    }
     ```
 
     ```bash
-    # exemplo de Saida Negativa    
+    # exemplo de Saida Negativa
+    # Nesse caso passando um CPF inválido   
+    {
+        "error": "Novo CPF informado é inválido!"
+    }
+    ```
+
+
+- **PUT** `/restaurantes` - Atualiza um Restaurante, ou parcialmente ou totalmente
+- ```javascript
+    //Objeto requerido pelo body na rota POST
+    const { cnpj, nomeFantasia } = req.body;
+    ```
+
+    ```bash
+    # exemplo no Postman
+    { 
+        "cnpj": "12776105000116", 
+        "nomeFantasia" : "Restaurante HD"
+    }
+    ```
+
+    ```bash
+    # exemplo de Saida Positiva
+    {
+        "message": "Restaurante atualizado com sucesso!"
+    }
+    ```
+
+    ```bash
+    # exemplo de Saida Negativa
+    # Nesse caso passando um CNPJ inválido   
+    {
+        "error": "Novo CNPJ informado é inválido!"
+    }
     ```
 
 ### DELETE
@@ -168,27 +230,45 @@ Validador do CPF/CNPJ. Usado nas rotas **POST** dos arquivos `restaurante.js` e 
     //para instalar o Validador do CNPJ no terminal
     npm i cpf-cnpj-validator -S
 ```
+
 ```javascript
     //Para usar no código para Validar o CPF
 
     const { validator } = require('cpf-cnpj-validator');
+    // Importa o validador de CPF/CNPJ.
 
     const Joi = require('@hapi/joi').extend(validator);
-    const validateCnpj = Joi.document().cpf();
+    // Importa o Joi (biblioteca de validação) e o estende com o validador de CPF/CNPJ.
 
-    if(validateCnpj.validate(cpf)){
-        console.log(`CPF válido`);
-    }
+    // Definição do Schema (Valida Nome e a regra matemática do CPF)
+    const clienteSchema = Joi.object({
+
+        // Forçamos o uso do validador de CPF da extensão
+        cpf: Joi.document().cpf().required().messages({
+            'document.cpf': 'O CPF informado é inválido.'
+            // Valida que o CPF é obrigatório e segue a regra matemática correta, não aceitando qualquer numero aleatorio.
+        })
+    });
+
+    const { error } = Joi.document().cpf().validate(cpf); //valida o CPF
+    if (error) return res.status(400).json({ error: "Novo CPF informado é inválido!" });//Caso CPF inválido ele retorna erro
 ```
+
 ```javascript
     //Para usar no código para Validar o CNPJ
     const { validator } = require('cpf-cnpj-validator');
+    // Importa o validador de CPF/CNPJ.
 
     const Joi = require('@hapi/joi').extend(validator);
-    const validateCnpj = Joi.document().cnpj();
+    // Importa o Joi (biblioteca de validação) e o estende com o validador de CPF/CNPJ.
 
-    if(validateCnpj.validate(cnpj)){
-        console.log(`CNPJ válido`);
-    }
+    // Definição do Schema para Restaurante
+    const restauranteSchema = Joi.object({
+        cnpj: Joi.document().cnpj().required()
+        // Valida que o CNPJ seja válido matematicamente e obrigatório.
+    });
+
+    const { error } = Joi.document().cnpj().validate(cnpj); //valida o CNPJ
+    if (error) return res.status(400).json({ error: "Novo CPJ informado é inválido!" });//Caso CNPJ inválido ele retorna erro
 ```
  

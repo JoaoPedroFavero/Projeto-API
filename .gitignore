@@ -5,3 +5,6 @@ node_modules/
 
 #senhas e tudo mais que não queres saber
 .env
+
+#banco de dados
+Fiscal
